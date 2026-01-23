@@ -23,3 +23,7 @@ Da biste pokrenuli ovaj program, potrebno je da imate instaliran GTK+ 3 razvojni
 **Ubuntu/Debian:**
 ```bash
 sudo apt-get install libgtk-3-dev
+
+### Screenshot-ovi aplikacije
+![Glavni prozor](1.png)
+![Rezultati algoritma](2.png)
