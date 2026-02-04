@@ -1,6 +1,32 @@
 #include "hashset.h"
 #include "sequence.h"
 
+#define MAX_LOAD_FACTOR 0.75f
+
+
+static void hash_set_resize(HashSet *hash_set) {
+    size_t old_capacity = hash_set->capacity;
+    size_t new_capacity = old_capacity * 2 + 1;
+
+    HashSetNode **new_buckets = (HashSetNode**)calloc(new_capacity, sizeof(HashSetNode*));
+    if(!new_buckets) {return;}
+
+    for(size_t i = 0; i < old_capacity; i++) {
+        HashSetNode *current = hash_set->buckets[i];
+        while(current) {
+            HashSetNode *next_node = current->next;
+            size_t hash_val = sequence_get_hash(current->sequence);
+            size_t new_index = hash_val % new_capacity;
+            current->next = new_buckets[new_index];
+            new_buckets[new_index] = current;
+            current = next_node;
+        }
+    }
+    free(hash_set->buckets);
+    hash_set->buckets = new_buckets;
+    hash_set->capacity = new_capacity;
+}
+
 static size_t hash_set_get_bucket_index(HashSet *hash_set, size_t hash_value) {
     if(hash_set->capacity == 0) {
         return 0;
@@ -53,6 +79,10 @@ bool hash_set_add(HashSet *hash_set, Sequence *sequence) {
     if(hash_set == NULL || sequence == NULL) {
         return false;
     }
+    if((float)hash_set->size / hash_set->capacity >= MAX_LOAD_FACTOR) {
+        hash_set_resize(hash_set);
+    }
+    
     size_t hash_value = sequence_get_hash(sequence);
     size_t index = hash_set_get_bucket_index(hash_set, hash_value);
     HashSetNode *current = hash_set->buckets[index];
