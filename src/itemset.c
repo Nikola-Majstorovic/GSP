@@ -79,8 +79,11 @@ size_t itemset_get_hash(Itemset *itemset) {
 
 bool itemset_add(Itemset* itemset, size_t item) {
     if(itemset->size >= itemset->capacity) {
-        itemset->capacity *= 2;
-        itemset = realloc(itemset->items, itemset->capacity * sizeof(size_t));
+        size_t new_capacity = itemset->capacity * 2;
+        size_t* tmp = realloc(itemset->items, new_capacity * sizeof(size_t));
+        if(!tmp) return false;
+        itemset->items = tmp;
+        itemset->capacity = new_capacity;
     }
     itemset->items[itemset->size++] = item;
     itemset->is_sorted = false;
